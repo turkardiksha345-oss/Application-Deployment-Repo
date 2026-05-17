@@ -1,0 +1,43 @@
+# Development environment overrides
+# Usage: helm install game-app helm/game-app -f helm/values-dev.yaml
+
+backend:
+  replicaCount: 1
+  image:
+    tag: develop
+  env:
+    NODE_ENV: development
+    LOG_LEVEL: debug
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+frontend:
+  replicaCount: 1
+  image:
+    tag: develop
+  env:
+    NODE_ENV: development
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+autoscaling:
+  backend:
+    enabled: false
+  frontend:
+    enabled: false
+
+ingress:
+  enabled: false
+
+persistence:
+  enabled: false

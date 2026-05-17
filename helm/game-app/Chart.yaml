@@ -1,0 +1,14 @@
+apiVersion: v2
+name: game-app
+description: A Helm chart for multi-player game application deployment
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - game
+  - multiplayer
+  - websocket
+  - kubernetes
+maintainers:
+  - name: DevOps Team
+    email: devops@company.com

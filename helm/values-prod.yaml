@@ -1,0 +1,101 @@
+# Production environment overrides
+# Usage: helm install game-app helm/game-app -f helm/values-prod.yaml
+
+backend:
+  replicaCount: 5
+  image:
+    tag: latest
+    pullPolicy: Always
+  env:
+    NODE_ENV: production
+    LOG_LEVEL: warn
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - game-backend
+          topologyKey: kubernetes.io/hostname
+
+frontend:
+  replicaCount: 4
+  image:
+    tag: latest
+    pullPolicy: Always
+  env:
+    NODE_ENV: production
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+autoscaling:
+  backend:
+    enabled: true
+    minReplicas: 5
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  frontend:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 75
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: game.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: game-tls-prod
+      hosts:
+        - game.example.com
+
+persistence:
+  enabled: true
+  storageClass: fast-ssd
+  size: 50Gi
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001

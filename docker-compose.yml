@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  game-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: game-backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: debug
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - game-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  # Frontend Service
+  game-frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: game-frontend
+    ports:
+      - "3001:3001"
+    environment:
+      REACT_APP_API_URL: http://localhost:3000
+      REACT_APP_WS_URL: ws://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      game-backend:
+        condition: service_healthy
+    networks:
+      - game-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (Optional, for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: game-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - game-backend
+      - game-frontend
+    networks:
+      - game-network
+    restart: unless-stopped
+
+networks:
+  game-network:
+    driver: bridge
+
+volumes:
+  game-data:
