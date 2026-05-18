@@ -135,7 +135,7 @@ jobs:
           --sync-policy automated \
           --auto-prune \
           --self-heal \
-          --upsert3
+          --upsert
 
       - name: Wait For Healthy Status
         run: |
