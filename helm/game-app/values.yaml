@@ -1,3 +1,6 @@
+nameOverride: ""
+fullnameOverride: ""
+
 global:
   environment: production
   domain: game.example.com
