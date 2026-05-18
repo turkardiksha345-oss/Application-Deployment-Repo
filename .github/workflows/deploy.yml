@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 env:
   REGISTRY: jfrogtrail1.jfrog.io
   REPOSITORY: docker-local-docker-local
@@ -33,7 +36,7 @@ jobs:
           --password-stdin \
           ${{ env.REGISTRY }}
 
-      # Backend Image Build
+      # Backend Build
 
       - name: Build Backend Docker Image
         run: |
@@ -47,7 +50,7 @@ jobs:
           docker push $REGISTRY/$REPOSITORY/backend:${SHORT_SHA}
           docker push $REGISTRY/$REPOSITORY/backend:latest
 
-      # Frontend Image Build
+      # Frontend Build
 
       - name: Build Frontend Docker Image
         run: |
@@ -73,25 +76,31 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Short Commit SHA
+        run: |
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Update Backend Image Tag
         run: |
-          sed -i "/backend:/,/tag:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
+          sed -i "/backend:/,/pullPolicy:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
 
       - name: Update Frontend Image Tag
         run: |
-          sed -i "/frontend:/,/tag:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
+          sed -i "/frontend:/,/pullPolicy:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
 
-      - name: Commit Helm Changes
+      - name: Commit And Push Helm Changes
         run: |
 
           git config --global user.name "github-actions"
 
           git config --global user.email "github-actions@github.com"
 
-          git add .
+          git add helm/game-app/values.yaml
 
-          git commit -m "Update image tags to ${SHORT_SHA}" || echo "No changes"
+          git commit -m "Update image tags to ${SHORT_SHA}" || echo "No changes to commit"
 
           git push
 
