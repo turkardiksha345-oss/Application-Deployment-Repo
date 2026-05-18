@@ -6,8 +6,8 @@ metadata:
 spec:
   description: Game Application Project
   sourceRepos:
-    - 'https://github.com/your-org/game-deployment.git'
-    - 'https://artifactory.company.com/*'
+    - 'https://github.com/turkardiksha345-oss/Application-Deployment.git'
+    - 'https://jfrogtrial1.jfrog.io/*'
   destinations:
     - namespace: 'game-app'
       server: https://kubernetes.default.svc
