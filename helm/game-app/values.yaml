@@ -10,7 +10,7 @@ backend:
 
   image:
     repository: jfrogtrail1.jfrog.io/docker-local-docker-local/backend
-    tag: f2b74d6
+    tag: b8d6806
     pullPolicy: IfNotPresent
 
   service:
@@ -49,7 +49,7 @@ frontend:
 
   image:
     repository: jfrogtrail1.jfrog.io/docker-local-docker-local/frontend
-    tag: f2b74d6
+    tag: b8d6806
     pullPolicy: IfNotPresent
 
   service:
