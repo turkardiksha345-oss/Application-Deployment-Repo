@@ -76,11 +76,11 @@ jobs:
 
       - name: Update Backend Image Tag
         run: |
-          sed -i "s/tag:.*/tag: ${SHORT_SHA}/" helm/backend-values.yaml
+          sed -i "/backend:/,/tag:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
 
       - name: Update Frontend Image Tag
         run: |
-          sed -i "s/tag:.*/tag: ${SHORT_SHA}/" helm/frontend-values.yaml
+          sed -i "/frontend:/,/tag:/ s/tag:.*/tag: ${SHORT_SHA}/" helm/game-app/values.yaml
 
       - name: Commit Helm Changes
         run: |

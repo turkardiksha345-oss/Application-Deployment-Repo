@@ -4,16 +4,17 @@ global:
 
 backend:
   replicaCount: 3
+
   image:
-    repository: artifactory.company.com/game-app/backend
+    repository: jfrogtrail1.jfrog.io/docker-local-docker-local/backend
     tag: latest
     pullPolicy: IfNotPresent
-  
+
   service:
     type: ClusterIP
     port: 3000
     targetPort: 3000
-  
+
   resources:
     limits:
       cpu: 500m
@@ -21,12 +22,12 @@ backend:
     requests:
       cpu: 250m
       memory: 256Mi
-  
+
   env:
     NODE_ENV: production
     PORT: 3000
     LOG_LEVEL: info
-  
+
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -42,16 +43,17 @@ backend:
 
 frontend:
   replicaCount: 2
+
   image:
-    repository: artifactory.company.com/game-app/frontend
+    repository: jfrogtrail1.jfrog.io/docker-local-docker-local/frontend
     tag: latest
     pullPolicy: IfNotPresent
-  
+
   service:
     type: ClusterIP
     port: 3001
     targetPort: 3001
-  
+
   resources:
     limits:
       cpu: 300m
@@ -59,21 +61,24 @@ frontend:
     requests:
       cpu: 100m
       memory: 128Mi
-  
+
   env:
     NODE_ENV: production
 
 ingress:
   enabled: true
   className: nginx
+
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/rate-limit: "100"
+
   hosts:
     - host: game.example.com
       paths:
         - path: /
           pathType: Prefix
+
   tls:
     - secretName: game-tls
       hosts:
@@ -86,18 +91,20 @@ persistence:
 
 metrics:
   enabled: true
+
   serviceMonitor:
     enabled: true
     interval: 30s
 
 autoscaling:
+
   backend:
     enabled: true
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
-  
+
   frontend:
     enabled: true
     minReplicas: 1
@@ -111,6 +118,21 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   fsGroup: 1000
+
   capabilities:
     drop:
       - ALL
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+resources: {}
