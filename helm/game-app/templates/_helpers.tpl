@@ -9,10 +9,13 @@ Expand the name of the chart.
 Create a default fully qualified app name.
 */}}
 {{- define "game-app.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- $fullnameOverride := default "" .Values.fullnameOverride -}}
+{{- $nameOverride := default "" .Values.nameOverride -}}
+
+{{- if $fullnameOverride }}
+{{- $fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- $name := default .Chart.Name $nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -34,9 +37,11 @@ Common labels
 {{- define "game-app.labels" -}}
 helm.sh/chart: {{ include "game-app.chart" . }}
 {{ include "game-app.selectorLabels" . }}
+
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
@@ -52,9 +57,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "game-app.serviceAccountName" -}}
+
 {{- if .Values.serviceAccount.create }}
 {{- default (include "game-app.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
+
 {{- end }}
