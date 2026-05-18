@@ -114,6 +114,9 @@ jobs:
 
     steps:
 
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Login To ArgoCD
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} \
@@ -121,10 +124,25 @@ jobs:
           --password ${{ secrets.ARGOCD_PASSWORD }} \
           --insecure
 
+      - name: Create ArgoCD Application
+        run: |
+
+          argocd app create my-application \
+          --repo https://github.com/turkardiksha345-oss/Application-Deployment-Repo.git \
+          --path helm/game-app \
+          --dest-server https://kubernetes.default.svc \
+          --dest-namespace default \
+          --sync-policy automated \
+          --auto-prune \
+          --self-heal \
+          --upsert
+
       - name: Sync ArgoCD Application
         run: |
           argocd app sync my-application
 
       - name: Wait For Healthy Status
         run: |
-          argocd app wait my-application --health --timeout 300
+          argocd app wait my-application \
+          --health \
+          --timeout 300
